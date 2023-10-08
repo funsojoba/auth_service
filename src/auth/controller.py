@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from src.db import db
 from src.auth.model import User
-from src.auth.schema import UserSchema
+from src.auth.schema import UserSchema, UsernameSchema
 from src.helpers.response import api_response
 
 
@@ -56,3 +56,38 @@ def login():
         return api_response(401, message="Invalid credentials")
 
     return api_response(200, message="login successful", data=dict(token=access_token))
+
+
+
+def generate_username(data):
+    """This function generates a list of usernames from the first and last name provided in the data
+
+    Args:
+        data (_type_): dict
+
+    Returns:
+        _type_: List[str]
+    """
+    first_name, last_name = data.get("first_name"), data.get("last_name")
+    
+    additional_symbols = "0123456789_"
+    usernames = []
+    for i in range(8):
+        first_letter = first_name[0:i+1]
+        last_letter = last_name[0:len(last_name)-i]
+        first_and_last_name = f"@{first_letter}{last_letter}"
+        username = first_and_last_name + "".join(random.choices(additional_symbols, k=8 - len(first_and_last_name)))
+        usernames.append(username)
+    return usernames
+
+
+def get_username():
+    data = request.get_json()
+    username_schema = UsernameSchema()
+    try:
+        user_data = username_schema.load(data)
+    except ValidationError as e:
+        return api_response(400, message="Validation error", errors=e.messages)
+
+    usernames = generate_username(user_data)
+    return api_response(200, message="username generated successful", data=dict(usernames=usernames))
