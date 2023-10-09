@@ -11,7 +11,6 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 
 from src.auth.route import auth_bp
-from src.tasks.route import task_bp
 from src.helpers.response import api_response
 
 
@@ -37,7 +36,6 @@ db.init_app(app)
 
 # Routes
 app.register_blueprint(auth_bp)
-app.register_blueprint(task_bp)
 
 
 @jwt.user_lookup_loader
@@ -51,10 +49,16 @@ def user_lookup_callback(_jwt_header, jwt_data):
 def index():
     return api_response(
         200,
-        data={"name": "Tasky", "date": datetime.now().strftime("%B %d, %Y")},
+        data={
+            "name": "Auth Service", 
+            "date": datetime.now().strftime("%B %d, %Y")},
         message="Welcome to my API",
     )
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=config("PORT"), threaded=False)
+    app.run(
+        host="0.0.0.0", 
+        debug=True if config("ENVIRONMENT") == "development" else False, 
+        port=config("PORT"), 
+        threaded=False)

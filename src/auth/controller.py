@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from src.db import db
 from src.auth.model import User
-from src.auth.schema import UserSchema, UsernameSchema
+from src.auth.schema import UserSchema, UsernameSchema, LoginSchema
 from src.helpers.response import api_response
 
 
@@ -21,9 +21,9 @@ def signup():
     except ValidationError as e:
         return api_response(400, message="Validation error", errors=e.messages)
 
-    users_with_username = User.query.filter_by(username=user_data["username"]).all()
+    user_with_email = User.query.filter_by(email=user_data["email"]).all()
 
-    if users_with_username:
+    if user_with_email:
         return api_response(409, message="Username already exists")
 
     user_data["password"] = generate_password_hash(user_data["password"])
@@ -38,13 +38,13 @@ def signup():
 def login():
     data = request.get_json()
 
-    user_schema = UserSchema()
+    user_schema = LoginSchema()
     try:
         user_data = user_schema.load(data)
     except ValidationError as e:
         return api_response(400, message="Validation error", errors=e.messages)
 
-    user = User.query.filter_by(username=user_data["username"]).first()
+    user = User.query.filter_by(email=user_data["email"]).first()
     if not user:
         return api_response(404, message="User not found")
 

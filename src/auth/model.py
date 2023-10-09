@@ -28,7 +28,7 @@ class User(db.Model):
     email = db.Column(db.String(120))
     password = db.Column(db.String(120), nullable=False)
 
-    def __init__(self, username, password):
+    def __init__(self, password, first_name, last_name, email, username=None):
         self.username = username
         self.password = password
         self.email = email
@@ -40,4 +40,4 @@ class User(db.Model):
         return self.first_name + " " + self.last_name
 
     def __repr__(self):
-        return f"<User {self.username}>"
+        return f"<User {self.first_name} {user.last_name}>"

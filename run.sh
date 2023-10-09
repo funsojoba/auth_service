@@ -5,7 +5,7 @@ export LOG_LEVEL="debug"
 fi
 
 if [ -z ${HTTP_PORT} ]; then
-export HTTP_PORT=":8000"
+export HTTP_PORT=":5001"
 fi
 if [ -z ${HTTP_WORKERS} ]; then
 export HTTP_WORKERS=2
@@ -13,12 +13,11 @@ fi
 
 
 export FLASK_APP=src.app:app
-echo "Initializing DB..."
+echo "Initializing DB . . ."
 
 flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
-
 
 
 status=$?
