@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from src.db import db
 from src.auth.model import User
-from src.auth.schema import UserSchema, UsernameSchema, LoginSchema
+from src.auth.schema import UserSchema, UsernameSchema, LoginSchema, SetUsernameSchema
 from src.helpers.response import api_response
 
 
@@ -91,3 +91,29 @@ def get_username():
 
     usernames = generate_username(user_data)
     return api_response(200, message="username generated successful", data=dict(usernames=usernames))
+
+
+
+def set_username():
+    data = request.get_json()
+    username = SetUsernameSchema()
+    try:
+        user_data = username_schema.load(data)
+    except ValidationError as e:
+        return api_response(400, message="Validation error", errors=e.messages)
+    existing_username = User.query.filter_by(username=user_data['username']).first()
+    
+    if existing_username:
+        return api_response(409, message="Username already exists")
+
+    user = User.query.filter_by(email=user_data['email']).first()
+
+    if not user:
+        return api_response(404, message="User not found")
+    
+    user.username = user_data['username']
+    db.session.commit()
+    return api_response(200, message="Username set successfully")
+
+    
+
